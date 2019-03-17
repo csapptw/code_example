@@ -24,8 +24,11 @@
 /* malloc wrapper function */
 void *malloc(size_t size)
 {
+    static __thread int print_times = 0;
     void *(*mallocp)(size_t size);
     char *error;
+
+    print_times++;
 
     mallocp = dlsym(RTLD_NEXT, "malloc"); /* Get address of libc malloc */
     if ((error = dlerror()) != NULL) {
@@ -33,7 +36,10 @@ void *malloc(size_t size)
         exit(1);
     }
     char *ptr = mallocp(size); /* Call libc malloc */
-    printf("malloc(%d) = %p\n", (int)size, ptr);
+    if (print_times == 1)
+    {
+        printf("malloc(%d) = %p\n", (int)size, ptr);
+    }
     return ptr;
 }
 
